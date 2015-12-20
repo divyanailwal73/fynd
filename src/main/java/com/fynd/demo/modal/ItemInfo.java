@@ -15,7 +15,7 @@ public class ItemInfo
 
     private String itemName;
 
-    private String mrp;
+    private int mrp;
 
     public SizeQuantity[] getSizeQuantity ()
     {
@@ -47,12 +47,12 @@ public class ItemInfo
         this.itemName = itemName;
     }
 
-    public String getMrp ()
+    public int getMrp ()
     {
         return mrp;
     }
 
-    public void setMrp (String mrp)
+    public void setMrp (int mrp)
     {
         this.mrp = mrp;
     }

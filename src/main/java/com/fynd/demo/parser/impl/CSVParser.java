@@ -18,14 +18,14 @@ public class CSVParser implements IParser<String,List<ItemInfo>> {
 	private final String TAG = CSVParser.class.getSimpleName();
 	private String filePath;
 	private List<ItemInfo> infoList;
-	private String[] sizeArray;
+	public static ArrayList<String> sizeArrayList;
 	private int quantityArraySize ;
 	private final String delimiter;
 	
 	public CSVParser() {
 		infoList = new ArrayList<ItemInfo>();
 		quantityArraySize = ItemInfo.SIZE_INDEX_END - ItemInfo.SIZE_INDEX_START + 1;
-		sizeArray = new String[quantityArraySize];
+		sizeArrayList = new ArrayList<>(quantityArraySize);
 		delimiter = ",";
 	}
 	public void parse() {
@@ -73,8 +73,8 @@ public class CSVParser implements IParser<String,List<ItemInfo>> {
 		if(line != null) {
 			String[] itemArray = line.split(delimiter);		
 			if(itemArray != null && ItemInfo.ITEM_NAME_INDEX >=0 && ItemInfo.MRP_INDEX < itemArray.length) {
-				for(int i=0, j = ItemInfo.SIZE_INDEX_START; (i<sizeArray.length && j <= ItemInfo.SIZE_INDEX_END ); i++, j++) {
-					sizeArray[i] = itemArray[j];
+				for(int j = ItemInfo.SIZE_INDEX_START; (j <= ItemInfo.SIZE_INDEX_END ); j++) {
+					sizeArrayList.add(itemArray[j]);
 				}
 			}
 		}		
@@ -87,17 +87,23 @@ public class CSVParser implements IParser<String,List<ItemInfo>> {
 				ItemInfo info = new ItemInfo();
 				info.setItemName(itemArray[ItemInfo.ITEM_NAME_INDEX]);
 				info.setShadeName(itemArray[ItemInfo.SHADE_NAME_INDEX]);
-				info.setMrp(itemArray[ItemInfo.MRP_INDEX]);
+				if(CommonUtils.isNumeric(itemArray[ItemInfo.MRP_INDEX])) {
+					info.setMrp(Integer.parseInt(itemArray[ItemInfo.MRP_INDEX]));
+				}				
+				
 				if(quantityArraySize > 0) {
 					SizeQuantity[] quantityArray = new SizeQuantity[quantityArraySize];						
-					for(int sIndex = 0, qIndex = ItemInfo.SIZE_INDEX_START; sIndex < sizeArray.length && qIndex <= ItemInfo.SIZE_INDEX_END; sIndex++,qIndex++) {
+					for(int sIndex = 0, qIndex = ItemInfo.SIZE_INDEX_START; sIndex < sizeArrayList.size() && qIndex <= ItemInfo.SIZE_INDEX_END; sIndex++,qIndex++) {
 						SizeQuantity quantitiy = new SizeQuantity();
 						try {
 							if(CommonUtils.isNumeric(itemArray[qIndex])) {							
-									quantitiy.setQuantity(Long.parseLong(itemArray[qIndex]));
+								quantitiy.setQuantity(Long.parseLong(itemArray[qIndex]));
+							} else {
+								quantitiy.setQuantity(0);
 							}
-							if(CommonUtils.isNumeric(sizeArray[sIndex])) {
-								quantitiy.setSize(Long.parseLong(sizeArray[sIndex]));
+							
+							if(CommonUtils.isNumeric(sizeArrayList.get(sIndex))) {
+								quantitiy.setSize(Long.parseLong(sizeArrayList.get(sIndex)));
 							}
 						} catch(Exception e) {
 							LogUtil.logError(TAG,e.getMessage());
@@ -106,7 +112,6 @@ public class CSVParser implements IParser<String,List<ItemInfo>> {
 					}
 					info.setSizeQuantity(quantityArray);
 				}	
-				
 				infoList.add(info);
 			}
 		}		

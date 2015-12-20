@@ -2,9 +2,8 @@ package com.fynd.demo.modal;
 
 public class SizeQuantity
 {
-    private long quantity;
-
-    private long size;
+	private long size;
+    private long quantity;    
 
     public long getQuantity ()
     {
